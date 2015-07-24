@@ -7,8 +7,6 @@ import android.util.Log;
 
 public class MainActivity extends AppCompatActivity {
 
-    private MyLeakThread myLeakThread;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -17,35 +15,26 @@ public class MainActivity extends AppCompatActivity {
         startLeak();
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        myLeakThread.cancel();
-    }
-
     private void startLeak() {
-        myLeakThread = new MyLeakThread();
+        MyLeakThread myLeakThread = new MyLeakThread();
         myLeakThread.start();
     }
 
-    private static class MyLeakThread extends Thread {
-        private boolean cancelRequested = false;
+    private class MyLeakThread extends Thread {
         private String data;
+        private int count;
 
         public MyLeakThread() {
             data = new String(new char[100000]);
+            count = 0;
         }
 
         @Override
         public void run() {
-            while (!cancelRequested) {
-                Log.i("TestLeakAndPerfomance", "Thread executed!");
+            while (true) {
+                Log.i("TestLeakAndPerfomance", "Thread executed! count = "+(++count));
                 SystemClock.sleep(1000);
             }
-        }
-
-        public void cancel() {
-            cancelRequested = true;
         }
     }
 }
