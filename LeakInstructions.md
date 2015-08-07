@@ -1,4 +1,4 @@
-# LeakAndPerformanceIssues
+# PerformanceInstructions
 
 Passos para executar:
 
