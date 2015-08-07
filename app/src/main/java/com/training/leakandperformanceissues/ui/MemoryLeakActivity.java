@@ -9,34 +9,45 @@ import com.training.leakandperformanceissues.R;
 
 public class MemoryLeakActivity extends AppCompatActivity {
 
+    private MyLeakThread myLeakThread;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_memory_leak);
+        setContentView(R.layout.activity_main);
 
         startLeak();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        myLeakThread.cancel();
+    }
+
     private void startLeak() {
-        MyLeakThread myLeakThread = new MyLeakThread();
+        myLeakThread = new MyLeakThread();
         myLeakThread.start();
     }
 
-    private class MyLeakThread extends Thread {
+    private static class MyLeakThread extends Thread {
+        private boolean cancelRequested = false;
         private String data;
-        private int count;
 
         public MyLeakThread() {
             data = new String(new char[100000]);
-            count = 0;
         }
 
         @Override
         public void run() {
-            while (true) {
-                Log.i("TestLeakAndPerfomance", "Thread executed! count = "+(++count));
+            while (!cancelRequested) {
+                Log.i("TestLeakAndPerfomance", "Thread executed!");
                 SystemClock.sleep(1000);
             }
+        }
+
+        public void cancel() {
+            cancelRequested = true;
         }
     }
 }

@@ -2,6 +2,7 @@ package com.training.leakandperformanceissues.ui;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -39,14 +40,29 @@ public class PerformanceProblemActivity extends AppCompatActivity {
         btnStartLongOperation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                textViewStatus.setVisibility(View.VISIBLE);
-                textViewStatus.setText("Executing...");
-                long startTime = System.currentTimeMillis();
-                int linesCount = performInsert();
-                long endTime = System.currentTimeMillis();
-                long spentTime = (endTime - startTime)/1000;
+                final long startTime = System.currentTimeMillis();
 
-                textViewStatus.setText("Done! inserted "+linesCount+" items. Time spent: "+spentTime+" secs.");
+                AsyncTask<Void, Integer, Integer> insertTask = new AsyncTask<Void, Integer, Integer>() {
+                    @Override
+                    protected void onPreExecute() {
+                        textViewStatus.setVisibility(View.VISIBLE);
+                        textViewStatus.setText("Executing...");
+                    }
+
+                    @Override
+                    protected Integer doInBackground(Void... voids) {
+                        return performInsert();
+                    }
+
+                    @Override
+                    protected void onPostExecute(Integer linesCount) {
+                        long endTime = System.currentTimeMillis();
+                        long spentTime = (endTime - startTime) / 1000;
+                        textViewStatus.setText("Done! inserted " + linesCount + " items. Time spent: " + spentTime + " secs.");
+                    }
+                };
+
+                insertTask.execute();
             }
         });
     }

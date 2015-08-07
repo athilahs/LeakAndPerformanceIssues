@@ -97,7 +97,7 @@ public class Provider extends ContentProvider {
 
     @Override
     public int bulkInsert(Uri uri, ContentValues[] values) {
-        String table;
+        String table = null;
         switch (URI_MATCHER.match(uri)) {
 
             case WONDER_DIR:
@@ -111,26 +111,22 @@ public class Provider extends ContentProvider {
 
         SQLiteDatabase dbConnection = database.getWritableDatabase();
         int res = 0;
-        for (ContentValues v : values) {
-            try {
-                dbConnection.beginTransaction();
+        dbConnection.beginTransaction();
+        try {
+            for (ContentValues v : values) {
                 long id = dbConnection.insertWithOnConflict(table, null, v, SQLiteDatabase.CONFLICT_REPLACE);
                 Log.i("LeakAndPerformance", "inserted into table: " + table + " id: " + id);
-
                 dbConnection.yieldIfContendedSafely();
-                dbConnection.setTransactionSuccessful();
-
                 if (id != -1) {
                     res++;
                 }
-
-                if (res != 0) {
-                    getContext().getContentResolver().notifyChange(uri, null);
-                }
-
-            } finally {
-                dbConnection.endTransaction();
             }
+            dbConnection.setTransactionSuccessful();
+        } finally {
+            dbConnection.endTransaction();
+        }
+        if (res != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
         }
 
         return res;
