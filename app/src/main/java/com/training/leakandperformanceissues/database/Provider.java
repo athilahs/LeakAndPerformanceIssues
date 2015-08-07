@@ -57,11 +57,6 @@ public class Provider extends ContentProvider {
         try {
             dbConnection.beginTransaction();
 
-            // Simulates a time consuming insert
-            for (int i = 0; i < 300000; i++) {
-                Log.i("PerformanceProblem", "Executing time consuming operation i = "+i);
-            }
-
             switch (URI_MATCHER.match(uri)) {
 
                 case WONDER_DIR:
@@ -98,5 +93,46 @@ public class Provider extends ContentProvider {
                       String[] selectionArgs) {
         // TODO: Implement this to handle requests to update one or more rows.
         throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    @Override
+    public int bulkInsert(Uri uri, ContentValues[] values) {
+        String table;
+        switch (URI_MATCHER.match(uri)) {
+
+            case WONDER_DIR:
+            case WONDER_ID:
+                table = WondersTable.TABLE_NAME;
+                break;
+
+            default:
+                throw new IllegalArgumentException("Unsupported URI: " + uri);
+        }
+
+        SQLiteDatabase dbConnection = database.getWritableDatabase();
+        int res = 0;
+        for (ContentValues v : values) {
+            try {
+                dbConnection.beginTransaction();
+                long id = dbConnection.insertWithOnConflict(table, null, v, SQLiteDatabase.CONFLICT_REPLACE);
+                Log.i("LeakAndPerformance", "inserted into table: " + table + " id: " + id);
+
+                dbConnection.yieldIfContendedSafely();
+                dbConnection.setTransactionSuccessful();
+
+                if (id != -1) {
+                    res++;
+                }
+
+                if (res != 0) {
+                    getContext().getContentResolver().notifyChange(uri, null);
+                }
+
+            } finally {
+                dbConnection.endTransaction();
+            }
+        }
+
+        return res;
     }
 }

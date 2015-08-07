@@ -1,9 +1,7 @@
 package com.training.leakandperformanceissues.ui;
 
 import android.content.ContentResolver;
-import android.content.ContentUris;
 import android.content.ContentValues;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -17,8 +15,7 @@ import com.training.leakandperformanceissues.database.table.WondersTable;
 public class PerformanceProblemActivity extends AppCompatActivity {
 
     private Button btnStartLongOperation;
-    private TextView textViewExecuting;
-    private TextView textViewDone;
+    private TextView textViewStatus;
 
     private ContentResolver resolver;
 
@@ -34,31 +31,40 @@ public class PerformanceProblemActivity extends AppCompatActivity {
     }
 
     private void loadUI() {
-        btnStartLongOperation = (Button)findViewById(R.id.btn_execute_long_operation);
-        textViewExecuting = (TextView)findViewById(R.id.textView_executing);
-        textViewDone = (TextView)findViewById(R.id.textView_done);
+        btnStartLongOperation = (Button) findViewById(R.id.btn_execute_long_operation);
+        textViewStatus = (TextView) findViewById(R.id.textView_status);
     }
 
     private void setListeners() {
         btnStartLongOperation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                long insertedId = performInsert();
-                textViewDone.setText("Done! Inserted id = "+insertedId);
-                textViewDone.setVisibility(View.VISIBLE);
+                textViewStatus.setVisibility(View.VISIBLE);
+                textViewStatus.setText("Executing...");
+                long startTime = System.currentTimeMillis();
+                int linesCount = performInsert();
+                long endTime = System.currentTimeMillis();
+                long spentTime = (endTime - startTime)/1000;
+
+                textViewStatus.setText("Done! inserted "+linesCount+" items. Time spent: "+spentTime+" secs.");
             }
         });
     }
 
-    private long performInsert() {
-        ContentValues values = new ContentValues();
-        values.put(WondersTable.NAME, "WonderTest");
-        values.put(WondersTable.COUNTRY, "Brasil");
-        values.put(WondersTable.DESCRIPTION, "Apenas uma inserção de teste.");
-        values.put(WondersTable.IMAGE_URL, "www.google.com");
+    private int performInsert() {
+        int numberOfInsertions = 3000;
 
-        Uri insertedUri = resolver.insert(Provider.WONDER_CONTENT_URI, values);
+        ContentValues[] linesToBeInserted = new ContentValues[numberOfInsertions];
+        for (int i = 0; i < numberOfInsertions; i++) {
+            ContentValues cv = new ContentValues();
+            cv.put(WondersTable.NAME, "WonderTest_"+i);
+            cv.put(WondersTable.COUNTRY, "Brasil");
+            cv.put(WondersTable.DESCRIPTION, "Apenas uma inserção de teste. Counter = "+i);
+            cv.put(WondersTable.IMAGE_URL, "www.google.com");
 
-        return ContentUris.parseId(insertedUri);
+            linesToBeInserted[i] = cv;
+        }
+
+        return resolver.bulkInsert(Provider.WONDER_CONTENT_URI, linesToBeInserted);
     }
 }
