@@ -46,13 +46,13 @@ public class PerformanceProblemActivity extends AppCompatActivity {
                 long endTime = System.currentTimeMillis();
                 long spentTime = (endTime - startTime)/1000;
 
-                textViewStatus.setText("Done! inserted "+linesCount+" items. Time spent: "+spentTime+" secs.");
+                textViewStatus.setText("Done! inserted " + linesCount + " items. Time spent: " + spentTime + " secs.");
             }
         });
     }
 
     private int performInsert() {
-        int numberOfInsertions = 3000;
+        int numberOfInsertions = 1000;
 
         ContentValues[] linesToBeInserted = new ContentValues[numberOfInsertions];
         for (int i = 0; i < numberOfInsertions; i++) {
