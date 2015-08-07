@@ -5,7 +5,7 @@
 3. Explique que existe dois metodos para capturar o trace: usando o Android Device Monitor através da opção "Start Method Profiling". Abrirá um diálogo perguntando se você quer executar o profiling por amostragem ou tudo. Este método é menos preciso. O outro método é através de instruções de código. Vamos focar neste método.
 4. Adicione a instrução Debug.startMethodTracing("myTraceFile", 30 * 1024 * 1024); no início do listener de clique no botão (o segundo parâmetro é o tamanho do arquivo de trace).
 5. Adicione a instrução Debug.stopMethodTracing(); no final do método para parar o tracing.
-6. No log irá aparecer o caminho para onde o arquivo de trace foi salvo.
+6. No log irá aparecer o caminho para onde o arquivo de trace foi salvo. Atenção: se aparecer uma mensagem dizendo que houve overflow do buffer, aumente o tamanho do arquivo de trace na instrução startMethodTracing
 7. Obter o arquivo de trace para a sua máquina: adb pull /storage/emulated/legacy/myTraceFile.trace ~/Desktop/
 8. Através do Android Device Monitor, abrir o arquivo de trace: File => Open File...
 9. Veja que há muita atividade na main thread. E que o método performInsert é o grande responsável.
