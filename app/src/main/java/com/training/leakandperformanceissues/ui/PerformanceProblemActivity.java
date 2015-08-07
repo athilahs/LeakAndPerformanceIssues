@@ -68,7 +68,7 @@ public class PerformanceProblemActivity extends AppCompatActivity {
     }
 
     private int performInsert() {
-        int numberOfInsertions = 3000;
+        int numberOfInsertions = 1000;
 
         ContentValues[] linesToBeInserted = new ContentValues[numberOfInsertions];
         for (int i = 0; i < numberOfInsertions; i++) {
