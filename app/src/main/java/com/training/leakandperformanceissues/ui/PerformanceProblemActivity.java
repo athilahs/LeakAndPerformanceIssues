@@ -3,6 +3,7 @@ package com.training.leakandperformanceissues.ui;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -16,6 +17,9 @@ public class PerformanceProblemActivity extends AppCompatActivity {
 
     private Button btnStartLongOperation;
     private TextView textViewStatus;
+
+    private Button btnStartAnotherOperation;
+    private TextView textViewAnotherOperation;
 
     private ContentResolver resolver;
 
@@ -33,6 +37,9 @@ public class PerformanceProblemActivity extends AppCompatActivity {
     private void loadUI() {
         btnStartLongOperation = (Button) findViewById(R.id.btn_execute_long_operation);
         textViewStatus = (TextView) findViewById(R.id.textView_status);
+
+        btnStartAnotherOperation = (Button) findViewById(R.id.btn_execute_another_operation);
+        textViewAnotherOperation = (TextView) findViewById(R.id.textView_another_operation);
     }
 
     private void setListeners() {
@@ -47,6 +54,22 @@ public class PerformanceProblemActivity extends AppCompatActivity {
                 long spentTime = (endTime - startTime)/1000;
 
                 textViewStatus.setText("Done! inserted " + linesCount + " items. Time spent: " + spentTime + " secs.");
+            }
+        });
+
+        btnStartAnotherOperation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                textViewAnotherOperation.setVisibility(View.VISIBLE);
+                new CountDownTimer(3000, 1) {
+                    @Override
+                    public void onTick(long millisUntilFinished) {}
+
+                    @Override
+                    public void onFinish() {
+                        textViewAnotherOperation.setVisibility(View.INVISIBLE);
+                    }
+                }.start();
             }
         });
     }
